@@ -1,0 +1,21 @@
+{
+    "name": "Base-App",
+    "version": "0.0.1",
+    "description": "",
+    "author": "",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "devDependencies": {
+        "@microsoft/teamsfx-cli": "1.*"
+    },
+    "license": "MIT",
+    "dependencies": {
+        "@microsoft/mgt-components": "^2.9.0",
+        "@microsoft/mgt-element": "^2.9.0",
+        "@microsoft/mgt-react": "^2.9.0",
+        "@microsoft/mgt-teams-msal2-provider": "^2.9.0",
+        "@microsoft/teams-js": "^2.8.0",
+        "react-charts": "^2.0.0-beta.7"
+    }
+}
