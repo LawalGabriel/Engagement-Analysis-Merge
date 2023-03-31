@@ -4,7 +4,7 @@ import { Toaster } from 'react-hot-toast';
 
 import config from "../utils/config";
 import { toasterErrorMessage } from '../utils/errorHandlingUtils';
-//import { TestDropdown } from "./drowdown";
+import TestDropdown from "./drowdown";
 
 const functionName = config.apiName || "myFunc";
 
@@ -20,7 +20,7 @@ export function AzureFunctions(props) {
   const handleSubmit = async () => {
     setIsClicked(true);
     try {
-      const response = await apiClient.get(`teamsanalytics`);
+      const response = await apiClient.get(`analytics`);
       setIsClicked(false);
       setApiData(response.data);
     } catch (error) {
@@ -52,7 +52,7 @@ export function AzureFunctions(props) {
           See the code in <code>{codePath}</code> to add your business logic.
         </p>
       </div>
-      {/* <TestDropdown apiClient={apiClient} triggerConsent={triggerConsent}/> */}
+      <TestDropdown apiClient={apiClient} triggerConsent={triggerConsent}/>
       <Toaster toastOptions={{ duration: 5000 }} />
     </div>
   );

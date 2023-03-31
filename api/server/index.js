@@ -15,7 +15,6 @@ module.exports = async function (context, req, teamsfxContext) {
   context.log("HTTP trigger function processed a request.");
   let route = context.bindingData.route; // Get api route name
   let method = req.method.toLowerCase();
-  let id = context.bindingData.id;
 
   try {
     // Prepare id token (also auth or sso token).
@@ -28,33 +27,31 @@ module.exports = async function (context, req, teamsfxContext) {
         },
       };
     }
-
     // get access token through on-behalf-of flow
     let accessToken = await getAccessToken(ssoToken);
-    //await getAnalyticsDataForSharepointsites(accessToken)
-    // Primary routing
+    // routing
     let response;
-    switch (method) {
-      case "get":
-        response = await getRequestHandler(accessToken, route);
-        break;
-      case "post":
-        response = await postRequestHandler(route, req);
-        break;
-      case "put":
-        response = await putRequestHandler(route, id);
-        break;
-      case "delete":
-        response = await deleteRequestHandler(route, id);
-        break;
+    if (method === "get") {
+      switch (route) {
+        case "consent":
+          response = { data: true };
+          break;
+        case "user":
+          response = await getSignedInUserData(accessToken);
+          break;
+        case "users":
+          response = await getAllUsers(accessToken);
+          break;
+        case "analytics":
+          response = await getAnalyticsData(accessToken, req);
+          break;
+      }
     }
-
     // return a response object to the client
     return {
       status: response.status || 200,
       body: response.data,
     };
-
   } catch (error) {
     return {
       status: error.status || 500,
@@ -64,48 +61,6 @@ module.exports = async function (context, req, teamsfxContext) {
     }
   }
 };
-
-async function getRequestHandler(accessToken, route) {
-  try {
-    let data, query;
-    switch (route) {
-      case "consent":
-        data = true;
-        break;
-      case "user":
-        data = await getSignedInUserData(accessToken); // get signed in user's Microsoft 365 data
-        break;
-    }
-
-    // if the switch...case statement results in a query, a database call is made
-    if (query) {
-      try {
-        data = await getResultFromDatabase(query);
-      } catch (error) {
-        throw error;
-      }
-    }
-
-    return {
-      status: 200,
-      data: data
-    }
-  } catch (error) {
-    throw { status: 500, message: "Unable to fetch data." };
-  }
-}
-
-async function postRequestHandler(route, req) {
-  // logic comes here
-}
-
-async function putRequestHandler(route, id) {
-  // logic comes here
-}
-
-async function deleteRequestHandler(route, id) {
-  // logic comes here
-}
 
 // function to exchange sso token for access token on-behalf-of the user from Azure AD
 async function getAccessToken(ssoToken) {
@@ -164,7 +119,10 @@ async function getSignedInUserData(accessToken) {
     let response = await fetch(userEndpoint, userOptions);
     if (response.ok) {
       let userData = await response.json();
-      return userData;
+      return {
+        status: 200,
+        data: userData
+      };
     } else {
       throw { status: 500, message: "Unable to get user's Microsoft 365 data." };
     }
@@ -173,9 +131,78 @@ async function getSignedInUserData(accessToken) {
   }
 }
 
-async function getAnalyticsDataForTeams(accessToken, queryParams) {
-  let userEndpoint = `https://graph.microsoft.com/v1.0/reports/getTeamsUserActivityUserDetail(period='D7')`;
-  let userOptions = {
+// function to get all users
+async function getAllUsers(accessToken) {
+  let allUsersEndpoint = "https://graph.microsoft.com/v1.0/users?$top=999&$filter=(onPremisesSyncEnabled eq true OR userType eq 'Member') and accountEnabled eq true&$select=id,mail,displayName,jobTitle,department,userPrincipalName"
+  let allUsersOptions = {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-type': 'application/json',
+      'Accept': 'application/json',
+      'Accept-Charset': 'utf-8'
+    },
+  };
+  try {
+    let response = await fetch(allUsersEndpoint, allUsersOptions);
+    if (response.ok) {
+      let allUsers = await response.json();
+      allUsers = allUsers?.value?.sort((a, b) => (a.displayName > b.displayName) ? 1 : ((b.displayName > a.displayName) ? -1 : 0));
+      return {
+        status: 200,
+        data: allUsers
+      };
+    } else {
+      throw { status: 500, message: "Failed to retrieve list of users." };
+    }
+  } catch (err) {
+    throw { status: 500, message: "Failed to retrieve list of users." };
+  }
+}
+
+async function getAnalyticsData(accessToken, req) {
+  try {
+    let analyticsData = {};
+    let userUpn = req.query?.userUpn;
+    let isEmailRegExp = new RegExp(/^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/);
+    let data = await Promise.all([
+      getAnalyticsDataForTeams(accessToken, userUpn),
+      getAnalyticsDataForEmails(accessToken, userUpn),
+      getAnalyticsDataForSharepoint(accessToken, userUpn)
+    ]);
+    if (isEmailRegExp.test(userUpn)) {
+      data.forEach((analytic, index) => {
+        analytic = analytic.find((user) => user["User Principal Name"] === userUpn);
+        switch (index) {
+          case 0:
+            analyticsData.teams = analytic;
+            break;
+          case 1:
+            analyticsData.outlook = analytic;
+            break;
+          case 2:
+            analyticsData.sharepoint = analytic;
+            break;
+        }
+      })
+    } else if (userUpn === "All") {
+      analyticsData.teams = data[0];
+      analyticsData.outlook = data[1];
+      analyticsData.sharepoint = data[2];
+    }
+
+    return {
+      status: 200,
+      data: analyticsData
+    };
+  } catch (err) {
+    throw { status: 500, message: "Failed to retrieve analytics data." };
+  }
+}
+
+async function getAnalyticsDataForTeams(accessToken) {
+  let teamsEndpoint = `https://graph.microsoft.com/v1.0/reports/getTeamsUserActivityUserDetail(period='D7')`;
+  let teamsOptions = {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${accessToken}`,
@@ -186,23 +213,22 @@ async function getAnalyticsDataForTeams(accessToken, queryParams) {
   };
 
   try {
-    let response = await fetch(userEndpoint, userOptions);
+    let response = await fetch(teamsEndpoint, teamsOptions);
     if (response.ok) {
       let teamsData = await response.text();
       teamsData = convertCSVToArray(teamsData);
-      console.log("..................", teamsData);
       return teamsData;
     } else {
-      throw { status: 500, message: "Unable to get user's Microsoft 365 data." };
+      throw { status: 500, message: "Failed to retrieve Microsoft Teams analytics data." };
     }
   } catch (err) {
-    throw { status: 500, message: "Unable to get user's Microsoft 365 data." };
+    throw { status: 500, message: "Failed to retrieve Microsoft Teams analytics data." };
   }
 }
 
-async function getAnalyticsDataForEmails(accessToken, queryParams) {
-  let userEndpoint = `https://graph.microsoft.com/v1.0/reports/getEmailActivityUserDetail(period='D7')`;
-  let userOptions = {
+async function getAnalyticsDataForEmails(accessToken) {
+  let outlookEndpoint = `https://graph.microsoft.com/v1.0/reports/getEmailActivityUserDetail(period='D7')`;
+  let outlookOptions = {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${accessToken}`,
@@ -213,23 +239,22 @@ async function getAnalyticsDataForEmails(accessToken, queryParams) {
   };
 
   try {
-    let response = await fetch(userEndpoint, userOptions);
+    let response = await fetch(outlookEndpoint, outlookOptions);
     if (response.ok) {
-      let teamsData = await response.text();
-      teamsData = convertCSVToArray(teamsData);
-      console.log("..................", teamsData);
-      return teamsData;
+      let outlookData = await response.text();
+      outlookData = convertCSVToArray(outlookData);
+      return outlookData;
     } else {
-      throw { status: 500, message: "Unable to get user's Microsoft 365 data." };
+      throw { status: 500, message: "Failed to retrieve Outlook analytics data." };
     }
   } catch (err) {
-    throw { status: 500, message: "Unable to get user's Microsoft 365 data." };
+    throw { status: 500, message: "Failed to retrieve Outlook analytics data." };
   }
 }
 
-async function getAnalyticsDataForSharepoint(accessToken, queryParams) {
-  let userEndpoint = `https://graph.microsoft.com/v1.0/reports/getSharePointActivityUserDetail(period='D7')`;
-  let userOptions = {
+async function getAnalyticsDataForSharepoint(accessToken) {
+  let sharepointEndpoint = `https://graph.microsoft.com/v1.0/reports/getSharePointActivityUserDetail(period='D7')`;
+  let sharepointOptions = {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${accessToken}`,
@@ -240,17 +265,47 @@ async function getAnalyticsDataForSharepoint(accessToken, queryParams) {
   };
 
   try {
-    let response = await fetch(userEndpoint, userOptions);
+    let response = await fetch(sharepointEndpoint, sharepointOptions);
     if (response.ok) {
-      let teamsData = await response.text();
-      teamsData = convertCSVToArray(teamsData);
-      console.log("..................", teamsData);
-      return teamsData;
+      let sharepointData = await response.text();
+      sharepointData = convertCSVToArray(sharepointData);
+      return sharepointData;
     } else {
-      throw { status: 500, message: "Unable to get user's Microsoft 365 data." };
+      throw { status: 500, message: "Failed to retrieve Sharepoint analytics data." };
     }
   } catch (err) {
-    throw { status: 500, message: "Unable to get user's Microsoft 365 data." };
+    throw { status: 500, message: "Failed to retrieve Sharepoint analytics data." };
+  }
+}
+
+function convertCSVToArray(csvData) {
+  try {
+    // retrieve the csv header as an array
+    let header = csvData.slice(0, csvData.indexOf('\n')).trim().split(',')
+
+    // retrieve the body of the csv into one array with each item being a row in the csv
+    let body = csvData.slice(csvData.indexOf('\n') + 1).split('\n');
+
+    // merge the header and each row in the body to be an array of objects
+    const parsedData = body.map(function (row) {
+      // split the row string into items in one array
+      // that is, ['2023-03-01', '00118923-2cf6-40eb-b6e6-574c11285e25', ...]
+      const values = row.trim().split(",");
+
+      // merge row (values) and header into an object
+      // that is, { 'Report Refresh Date': '2023-03-01', 'User Id': '00118923-2cf6-40eb-b6e6-574c11285e25', ...}
+      const storeKeyValue = header.reduce(
+        function (obj, title, index) {
+          obj[title] = values[index];
+          return obj;
+        }, {});
+
+      return storeKeyValue;
+    });
+
+    return parsedData;
+  } catch (err) {
+    throw err;
   }
 }
 
@@ -280,104 +335,3 @@ async function getAnalyticsDataForSharepoint(accessToken, queryParams) {
 //     throw { status: 500, message: "Unable to get user's Microsoft 365 data." };
 //   }
 // }
-function convertCSVToArray(csvData) {
-  // retrieve the csv header as an array
-  let header = csvData.slice(0, csvData.indexOf('\n')).trim().split(',')
-
-  // retrieve the body of the csv into one array with each item being a row in the csv
-  let body = csvData.slice(csvData.indexOf('\n') + 1).split('\n');
-
-  // merge the header and each row in the body to be an array of objects
-  const parsedData = body.map(function (row) {
-    // split the row string into items in one array
-    // that is, ['2023-03-01', '00118923-2cf6-40eb-b6e6-574c11285e25', ...]
-    const values = row.trim().split(",");
-
-    // merge row (values) and header into an object
-    // that is, { 'Report Refresh Date': '2023-03-01', 'User Id': '00118923-2cf6-40eb-b6e6-574c11285e25', ...}
-    const storeKeyValue = header.reduce(
-      function (obj, title, index) {
-        obj[title] = values[index];
-        return obj;
-      }, {});
-
-    return storeKeyValue;
-  });
-
-  return parsedData;
-}
-
-// Create connection to SQL Server database
-async function getSQLConnection(teamsfx) {
-  const tediousConfig = {
-    authentication: {
-      options: {
-        userName: config.sqlUsername,
-        password: config.sqlPassword,
-      },
-      type: 'default'
-    },
-    server: config.sqlEndpoint,
-    options: {
-      database: config.sqlDatabaseName,
-      encrypt: true
-    }
-  };
-  const connection = new Connection(tediousConfig);
-  return new Promise((resolve, reject) => {
-    connection.on('connect', err => {
-      if (err) {
-        reject(err);
-      }
-      resolve(connection);
-    })
-
-    connection.on('debug', function (err) {
-      console.log('debug:', err);
-    });
-
-    connection.connect()
-  })
-}
-
-// Query connected SQL database
-async function execQuery(query, connection) {
-  return new Promise((resolve, reject) => {
-    const res = [];
-    const request = new Request(query, (err) => {
-      if (err) {
-        reject(err);
-      }
-    });
-
-    request.on('row', columns => {
-      const row = {};
-      columns.forEach(column => {
-        row[column.metadata.colName] = column.value;
-      });
-      res.push(row)
-    });
-
-    request.on('requestCompleted', () => {
-      // add request object to response {res, request}
-      resolve(res)
-    });
-
-    request.on("error", err => {
-      reject(err);
-    });
-
-    connection.execSql(request);
-  })
-}
-
-async function getResultFromDatabase(query) {
-  try {
-    const connection = await getSQLConnection();
-    const result = await execQuery(query, connection);
-    connection.close(); // close sql database connection after executing query
-    return result
-  } catch (error) {
-    throw (error);
-  }
-}
