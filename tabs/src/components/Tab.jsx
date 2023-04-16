@@ -12,6 +12,7 @@ import { TeamsFx } from '@microsoft/teamsfx';
 import { toasterErrorMessage } from "./utils/errorHandlingUtils";
 import { Toaster } from "react-hot-toast";
 import Configure from "./helperComponents/Configure";
+import MyChart from "./Chart";
 
 /* TODO
   * implement checking if a tenant is configured to use the application
@@ -99,6 +100,7 @@ export default function Tab() {
       {!isConfigured && !loading && <Configure />}
       {isConfigured && !loading && <div>{needConsent ? <Consent triggerConsent={triggerConsent} /> : <Welcome triggerConsent={triggerConsent} apiClient={apiClient} />}</div>}
       <Toaster toastOptions={{ duration: 5000 }} />
+      <MyChart/>
     </div>
   );
 }
