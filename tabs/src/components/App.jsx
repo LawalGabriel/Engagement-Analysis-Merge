@@ -10,8 +10,7 @@ import TabConfig from "./TabConfig";
 import { TeamsFxContext } from "./Context";
 import config from "./utils/config";
 import MyAnalytics from "./Analytics";
-//import { Chart } from "react-charts/dist/react-charts.development";
-//import MyChart from "./Chart";
+import MyChart from "./Chart";
 
 
 
@@ -29,7 +28,7 @@ export default function App() {
     <TeamsFxContext.Provider value={{theme, themeString, teamsUserCredential}}>
       <Provider theme={theme || teamsTheme} styles={{ backgroundColor: "#eeeeee" }}>
         <Router> 
-         
+        <MyChart/>
           <MyAnalytics />
           <Route exact path="/">
             <Redirect to="/tab" />

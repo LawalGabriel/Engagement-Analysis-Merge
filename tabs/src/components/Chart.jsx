@@ -49,6 +49,12 @@ function MyChart() {
            <PieChart chartData={userData} />
       </div>
     </div>
+    <div class="card shadow-2-strong">
+      <div class="card-body">
+          <p class="text-uppercase mb-2"><strong>Extensive Amount</strong></p>
+          <hr />
+           <BarChart chartData={userData} />
+      </div></div>
 </div>
 </div>
 
