@@ -96,9 +96,9 @@ export default function Tab() {
 
   return (
     <div className={themeString === "default" ? "" : "dark"}>
-      {loading && <Loader />}
+       {loading && <Loader />}
       {!isConfigured && !loading && <Configure />}
-      {isConfigured && !loading && <div>{needConsent ? <Consent triggerConsent={triggerConsent} /> : <Welcome triggerConsent={triggerConsent} apiClient={apiClient} />}</div>}
+      {isConfigured && !loading && <div>{needConsent ? <Consent triggerConsent={triggerConsent} /> : <Welcome triggerConsent={triggerConsent} apiClient={apiClient} />}</div>} 
       <Toaster toastOptions={{ duration: 5000 }} />
       
     </div>

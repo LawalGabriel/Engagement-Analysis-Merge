@@ -28,6 +28,13 @@ function MyChart() {
   return (
     <div class="container">
 <div class="row">
+  
+<div class="card shadow-2-strong card-header">
+      <div class="card-body">
+          <p class="text-uppercase mb-2"><strong>Extensive Amount</strong></p>
+          <hr />
+        
+      </div></div>
     <div class="card shadow-2-strong">
       <div class="card-body">
           <p class="text-uppercase mb-2"><strong>Extensive Amount</strong></p>
@@ -55,6 +62,7 @@ function MyChart() {
           <hr />
            <BarChart chartData={userData} />
       </div></div>
+      
 </div>
 </div>
 

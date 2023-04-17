@@ -28,8 +28,7 @@ export default function App() {
     <TeamsFxContext.Provider value={{theme, themeString, teamsUserCredential}}>
       <Provider theme={theme || teamsTheme} styles={{ backgroundColor: "#eeeeee" }}>
         <Router> 
-        <MyChart/>
-          <MyAnalytics />
+        
           <Route exact path="/">
             <Redirect to="/tab" />
           </Route>
@@ -43,6 +42,9 @@ export default function App() {
               <Route exact path="/config" component={TabConfig} />
             </>
           )}
+         
+          <MyChart/>
+          <MyAnalytics />
         </Router>
       </Provider>
       </TeamsFxContext.Provider>

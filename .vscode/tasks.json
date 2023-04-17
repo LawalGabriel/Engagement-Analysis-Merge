@@ -188,6 +188,15 @@
             "problemMatcher": [],
             "label": "npm: build - tabs",
             "detail": "react-scripts build"
+        },
+        {
+            "type": "npm",
+            "script": "build",
+            "path": "tabs",
+            "group": "build",
+            "problemMatcher": [],
+            "label": "npm: build - tabs",
+            "detail": "react-scripts build"
         }
     ]
 }
