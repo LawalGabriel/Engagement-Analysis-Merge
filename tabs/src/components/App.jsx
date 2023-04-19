@@ -9,11 +9,9 @@ import "./App.css";
 import TabConfig from "./TabConfig";
 import { TeamsFxContext } from "./Context";
 import config from "./utils/config";
-import MyAnalytics from "./Analytics";
+//import MyAnalytics from "./Analytics";
 import MyChart from "./Chart";
-
-
-
+import MyHeader from "./TileHeader";
 
 /**
  * The main app which handles the initialization and routing
@@ -28,7 +26,7 @@ export default function App() {
     <TeamsFxContext.Provider value={{theme, themeString, teamsUserCredential}}>
       <Provider theme={theme || teamsTheme} styles={{ backgroundColor: "#eeeeee" }}>
         <Router> 
-        
+       
           <Route exact path="/">
             <Redirect to="/tab" />
           </Route>
@@ -42,9 +40,9 @@ export default function App() {
               <Route exact path="/config" component={TabConfig} />
             </>
           )}
-         
+          <MyHeader/>
           <MyChart/>
-          <MyAnalytics />
+          {/* <MyAnalytics /> */}
         </Router>
       </Provider>
       </TeamsFxContext.Provider>

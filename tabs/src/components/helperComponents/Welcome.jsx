@@ -33,7 +33,7 @@ export function Welcome(props) {
 
   return (
     <div className="welcome page">
-      <div className="narrow page-padding">
+      {/* <div className="narrow page-padding">
         <Image src="hello.png" />
         <h1 className="center">Congratulations{userName ? ", " + userName : ""}!</h1>
         {hubName && (
@@ -41,8 +41,9 @@ export function Welcome(props) {
         )}
         <p className="center">Your app is running in your {friendlyEnvironmentName}</p>
         <div style={{ marginBottom: '100px' }}></div>
-          <AzureFunctions triggerConsent={triggerConsent} apiClient={apiClient}/>
-      </div>
+        
+      </div> */}
+      <AzureFunctions triggerConsent={triggerConsent} apiClient={apiClient}/>
     </div>
   );
 }

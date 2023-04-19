@@ -26,44 +26,42 @@ function MyChart() {
   });
 
   return (
+    
     <div class="container">
-<div class="row">
-  
-<div class="card shadow-2-strong card-header">
+<div class="row mt-2">
+    <div class="col-md-6 card">
       <div class="card-body">
-          <p class="text-uppercase mb-2"><strong>Extensive Amount</strong></p>
-          <hr />
-        
-      </div></div>
-    <div class="card shadow-2-strong">
-      <div class="card-body">
-          <p class="text-uppercase mb-2"><strong>Extensive Amount</strong></p>
+          <p class="text-uppercase mb-2"><strong>Teams Call Analytics</strong></p>
           <hr />
            <BarChart chartData={userData} />
       </div>
     </div>
-    <div class="card shadow-2-strong">
+    <div class="col-md-6 card ">
       <div class="card-body">
-          <p class="text-uppercase mb-2"><strong>Total Approved</strong></p>
+          <p class="text-uppercase mb-2"><strong>Teams Meeting Analytics</strong></p>
           <hr />
            <LineChart chartData={userData} />
       </div>
     </div>
-    <div class="card shadow-2-strong">
+    </div>
+    <div className ="row ">
+    <div class="col-md-6 card ">
       <div class="card-body">
-          <p class="text-uppercase mb-2"><strong>Pie Chart</strong></p>
+          <p class="text-uppercase mb-2"><strong>Outlook Analytics</strong></p>
           <hr />
            <PieChart chartData={userData} />
       </div>
     </div>
-    <div class="card shadow-2-strong">
+    <div class="col-md-6 card ">
       <div class="card-body">
-          <p class="text-uppercase mb-2"><strong>Extensive Amount</strong></p>
+          <p class="text-uppercase mb-2"><strong>SharePoint Analytics</strong></p>
           <hr />
            <BarChart chartData={userData} />
       </div></div>
+    </div>
+   
       
-</div>
+
 </div>
 
   );

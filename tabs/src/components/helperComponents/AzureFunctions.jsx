@@ -36,9 +36,9 @@ export function AzureFunctions(props) {
 
   return (
     <div>
-      <div>
-        <h2>Call your Azure Function</h2>
-        <p>An Azure Functions app is running. Authorize this app and click below to call it for a response:</p>
+      <div style={{display:"none"}}>
+        {/* <h2>Call your Azure Function</h2>
+        <p>An Azure Functions app is running. Authorize this app and click below to call it for a response:</p> */}
         <Button primary content="Call Azure Function" onClick={handleSubmit} />
         {isClicked && !apiData && (
           <pre className="fixed">
@@ -47,10 +47,10 @@ export function AzureFunctions(props) {
         )}
         {!isClicked && !apiData && <pre className="fixed"></pre>}
         {apiData && <pre className="fixed">{JSON.stringify(apiData, null, 2)}</pre>}
-        <h4>How to edit the Azure Function</h4>
+        {/* <h4>How to edit the Azure Function</h4>
         <p>
           See the code in <code>{codePath}</code> to add your business logic.
-        </p>
+        </p> */}
       </div>
       <TestDropdown apiClient={apiClient} triggerConsent={triggerConsent}/>
       <Toaster toastOptions={{ duration: 5000 }} />

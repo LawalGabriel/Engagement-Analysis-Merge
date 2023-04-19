@@ -53,9 +53,13 @@ export default function TestDropdown(props) {
         onRemove: item => `${item.header} has been removed.`,
     }
 
+    const seconddata = [7,30,60,180]
+
     return (
-        <div>
-            {loading && <Loader />}
+        <div className="container mt-4">
+            <div className="row">
+                <div className="col-md-4">
+                {loading && <Loader />}
             {!loading && <Dropdown
                 key={dropdownData.content}
                 search
@@ -65,14 +69,29 @@ export default function TestDropdown(props) {
                 noResultsMessage="We couldn't find any matches."
                 onChange={async (_, event) => await handleChange(event)}
             />}
-            {isClicked && !apiData && (
+                </div>
+                <div className="col-md-4">
+                {loading && <Loader />}
+            {!loading && <Dropdown
+                key={dropdownData.content}
+                search
+                items={seconddata}
+                placeholder="Select Duration"
+                getA11ySelectionMessage={getA11ySelectionMessage}
+                noResultsMessage="We couldn't find any matches."
+                onChange={async (_, event) => await handleChange(event)}
+            />}
+                </div>
+            </div>
+           
+            {/* {isClicked && !apiData && (
                 <pre className="fixed">
                     <Loader />
                 </pre>
             )}
             {!isClicked && !apiData && <pre className="fixed"></pre>}
             {apiData && <pre className="fixed">{JSON.stringify(apiData, null, 2)}</pre>}
-            <Toaster toastOptions={{ duration: 5000 }} />
+            <Toaster toastOptions={{ duration: 5000 }} /> */}
         </div>
     );
 }
