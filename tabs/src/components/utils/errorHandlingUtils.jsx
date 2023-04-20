@@ -29,7 +29,7 @@ class ErrorBoundary extends React.Component {
             // Error path
             return (
                 <div>
-                    <p>An error occured! Please try again later.</p>
+                    <p>An unexpected error occured. Please try again later.</p>
                 </div>
             );
         }
@@ -38,8 +38,19 @@ class ErrorBoundary extends React.Component {
     }
 }
 
+// Typical error handling when sending requests to the backend
+function handleBackendRequestBlockErrors (error, triggerConsent) {
+    let errorMessage = error?.response?.data?.error || "An error occured!";
+      if (errorMessage?.includes("invalid_grant")) {
+        triggerConsent(true);
+      } else {
+        toasterErrorMessage(errorMessage); // TODO: Revisit the error message shown
+      }
+}
+
 export {
     toasterErrorMessage,
     toasterSuccessMessage,
-    ErrorBoundary
+    ErrorBoundary,
+    handleBackendRequestBlockErrors
 }

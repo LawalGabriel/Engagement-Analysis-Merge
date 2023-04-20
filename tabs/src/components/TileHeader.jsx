@@ -1,12 +1,35 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import "./App.css";
-// import BarChart from "./chartComponent/BarChart";
-// import LineChart from "./chartComponent/LineChart";
-// import PieChart from "./chartComponent/PieChart";
+import { useData } from "@microsoft/teamsfx-react";
+import { BearerTokenAuthProvider, createApiClient } from "@microsoft/teamsfx";
+import { TeamsFxContext } from './Context';
+
 import { UserData } from "./Data";
+import config from './utils/config';
 require('../../node_modules/bootstrap/dist/css/bootstrap.min.css');
 
-function MyHeader() {
+const MyHeader = () => {
+  // Create API client
+
+  const teamsUserCredential = useContext(TeamsFxContext).teamsUserCredential;
+
+  if (!teamsUserCredential) {
+  
+  // TODO: Replace this with a toaster error popup.
+  
+  throw new Error("TeamsFx SDK is not initialized.");
+  
+  }
+  
+  const apiBaseUrl = config.apiEndpoint + "/api/";
+  
+  const apiClient = createApiClient(
+  
+  apiBaseUrl,
+  
+  new BearerTokenAuthProvider(async () => (await teamsUserCredential.getToken("")).token)
+  
+  );
     const [userData, setUserData] = useState({
       labels: UserData.map((data) => data.year),
       datasets: [
