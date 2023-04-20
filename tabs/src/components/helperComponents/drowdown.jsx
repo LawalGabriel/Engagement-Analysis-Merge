@@ -84,14 +84,14 @@ export default function TestDropdown(props) {
                 </div>
             </div>
            
-            {/* {isClicked && !apiData && (
+             {isClicked && !apiData && (
                 <pre className="fixed">
                     <Loader />
                 </pre>
             )}
             {!isClicked && !apiData && <pre className="fixed"></pre>}
             {apiData && <pre className="fixed">{JSON.stringify(apiData, null, 2)}</pre>}
-            <Toaster toastOptions={{ duration: 5000 }} /> */}
+            <Toaster toastOptions={{ duration: 5000 }} /> 
         </div>
     );
 }
