@@ -201,7 +201,7 @@ async function getAnalyticsData(accessToken, req) {
 }
 
 async function getAnalyticsDataForTeams(accessToken) {
-  let teamsEndpoint = `https://graph.microsoft.com/v1.0/reports/getTeamsUserActivityUserDetail(period='D7')`;
+  let teamsEndpoint = `https://graph.microsoft.com/v1.0/reports/getTeamsUserActivityUserDetail(period='D180')`;
   let teamsOptions = {
     method: 'GET',
     headers: {
@@ -227,7 +227,7 @@ async function getAnalyticsDataForTeams(accessToken) {
 }
 
 async function getAnalyticsDataForEmails(accessToken) {
-  let outlookEndpoint = `https://graph.microsoft.com/v1.0/reports/getEmailActivityUserDetail(period='D7')`;
+  let outlookEndpoint = `https://graph.microsoft.com/v1.0/reports/getEmailActivityUserDetail(period='D180')`;
   let outlookOptions = {
     method: 'GET',
     headers: {
@@ -253,7 +253,7 @@ async function getAnalyticsDataForEmails(accessToken) {
 }
 
 async function getAnalyticsDataForSharepoint(accessToken) {
-  let sharepointEndpoint = `https://graph.microsoft.com/v1.0/reports/getSharePointActivityUserDetail(period='D7')`;
+  let sharepointEndpoint = `https://graph.microsoft.com/v1.0/reports/getSharePointActivityUserDetail(period='D180')`;
   let sharepointOptions = {
     method: 'GET',
     headers: {
