@@ -12,7 +12,7 @@ import { TeamsFx } from '@microsoft/teamsfx';
 import { toasterErrorMessage } from "./utils/errorHandlingUtils";
 import { Toaster } from "react-hot-toast";
 import Configure from "./helperComponents/Configure";
-
+import TestDropdown from "./helperComponents/drowdown"
 
 /* TODO
   * implement checking if a tenant is configured to use the application
@@ -98,7 +98,7 @@ export default function Tab() {
     <div className={themeString === "default" ? "" : "dark"}>
        {loading && <Loader />}
       {!isConfigured && !loading && <Configure />}
-      {isConfigured && !loading && <div>{needConsent ? <Consent triggerConsent={triggerConsent} /> : <Welcome triggerConsent={triggerConsent} apiClient={apiClient} />}</div>} 
+      {isConfigured && !loading && <div>{needConsent ? <Consent triggerConsent={triggerConsent} /> : <TestDropdown triggerConsent={triggerConsent} apiClient={apiClient} />}</div>} 
       <Toaster toastOptions={{ duration: 5000 }} />
       
     </div>

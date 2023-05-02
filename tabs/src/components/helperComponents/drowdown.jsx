@@ -1,15 +1,19 @@
 import { useState } from "react";
-import { Dropdown, Loader } from '@fluentui/react-northstar'
+import { Dropdown, Header, Loader } from '@fluentui/react-northstar'
 import { toasterErrorMessage } from "../utils/errorHandlingUtils";
 import { useData } from "@microsoft/teamsfx-react";
 import { Toaster } from "react-hot-toast";
+import MyHeader from "../TileHeader";
+import MyChart from "../Chart";
 
 export default function TestDropdown(props) {
     const { apiClient, triggerConsent } = { ...props };
     const [dropdownData, setDropDownData] = useState();
     const [apiData, setApiData] = useState(undefined);
     const [isClicked, setIsClicked] = useState(false);
-
+    const [outlookData, setOutlookData] = useState(undefined);
+    const [teamsData, setTeamsData] = useState(undefined);
+    const [sharepointData, setSharepointData] = useState(undefined);
     const { loading } = useData(async () => {
         try {
             const response = await apiClient.get("users");
@@ -29,7 +33,7 @@ export default function TestDropdown(props) {
         }
     });
 
-
+    
     const handleChange = async (event) => {
         setIsClicked(true);
         setApiData();
@@ -37,6 +41,9 @@ export default function TestDropdown(props) {
             const response = await apiClient.get(`analytics?userUpn=${event.value.header}`);
             setIsClicked(false);
             setApiData(response.data);
+            setOutlookData(response.data.outlook);
+            setSharepointData(response.data.sharepoint);
+            setTeamsData(response.data.teams)
         } catch (error) {
             setIsClicked(false);
             let errorMessage = error.response.data.error;
@@ -52,7 +59,10 @@ export default function TestDropdown(props) {
         onAdd: item => `${item.header} has been selected.`,
         onRemove: item => `${item.header} has been removed.`,
     }
-
+    console.log("data",apiData)
+    console.log("Outlook",outlookData)
+    console.log("teams",teamsData)
+    console.log("sharepoint",sharepointData)
     const seconddata = [7,30,60,180]
 
     return (
@@ -91,6 +101,8 @@ export default function TestDropdown(props) {
             )}
             {!isClicked && !apiData && <pre className="fixed"></pre>}
             {apiData && <pre className="fixed">{JSON.stringify(apiData, null, 2)}</pre>}
+            <MyHeader apiData={apiData} sharepointData={sharepointData} teamsData={teamsData} outlookData={outlookData}/>
+            <MyChart apiData={apiData} sharepointData={sharepointData} teamsData={teamsData} outlookData={outlookData}/>
             <Toaster toastOptions={{ duration: 5000 }} /> 
         </div>
     );

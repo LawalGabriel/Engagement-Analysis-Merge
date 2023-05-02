@@ -10,8 +10,8 @@ import TabConfig from "./TabConfig";
 import { TeamsFxContext } from "./Context";
 import config from "./utils/config";
 //import MyAnalytics from "./Analytics";
-import MyChart from "./Chart";
-import MyHeader from "./TileHeader";
+// import MyChart from "./Chart";
+// import MyHeader from "./TileHeader";
 
 /**
  * The main app which handles the initialization and routing
@@ -40,8 +40,8 @@ export default function App() {
               <Route exact path="/config" component={TabConfig} />
             </>
           )}
-          <MyHeader/>
-          <MyChart/>
+          {/* <MyHeader/>
+          <MyChart/> */}
           {/* <MyAnalytics /> */}
         </Router>
       </Provider>
