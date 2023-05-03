@@ -6,13 +6,18 @@ body{
 .maincard{
     width: 370px !important;
     margin:3px;
-}
 
-    /* .card {
+}
+.count{
+    float:right !important;
+    font-weight: bold !important;
+}
+.card-chart {
         position: relative;
         display: flex;
         flex-direction: column;
         width: 32rem;
+        height: 400px;
         word-wrap: break-word;
         background-color: #ffffff;
         background-clip: border-box;
@@ -24,7 +29,7 @@ body{
         -webkit-box-shadow: 0px 0px 10px 0px rgba(82, 63, 105, 0.1);
         -moz-box-shadow: 0px 0px 10px 0px rgba(82, 63, 105, 0.1);
         -ms-box-shadow: 0px 0px 10px 0px rgba(82, 63, 105, 0.1);
-    }
+    }/*
     .card-header {
         position: relative;
         display: flex;
