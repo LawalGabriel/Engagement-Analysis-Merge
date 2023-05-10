@@ -7,7 +7,7 @@ import MyHeader from "../TileHeader";
 import MyChart from "../Chart";
 
 export default function TestDropdown(props) {
-    const { apiClient, triggerConsent } = { ...props };
+    const { apiClient, triggerConsent, loggedInUser } = { ...props };
     const [dropdownData, setDropDownData] = useState();
     const [apiData, setApiData] = useState(undefined);
     const [isClicked, setIsClicked] = useState(false);
@@ -19,6 +19,7 @@ export default function TestDropdown(props) {
     const [videoCount, setVidoeCount] = useState([]);
     const [ScreenCount, setScreenCount] = useState([]);
     const [meetingData, setMeetingData] = useState([]);
+
     const { loading } = useData(async () => {
         try {
             const response = await apiClient.get("users");
@@ -38,16 +39,30 @@ export default function TestDropdown(props) {
         }
     });
 
+    // Get analytics data for logged in user
+    useData(async () => {
+        await getAnalyticsData(loggedInUser.preferredUserName);
+    });
 
     const handleChange = async (event) => {
         setIsClicked(true);
         setApiData();
         try {
-            const response = await apiClient.get(`analytics?userUpn=${event.value.header}`);
             setIsClicked(false);
+            await getAnalyticsData(event.value.header);
+        } catch (error) {
+            setIsClicked(false);
+            toasterErrorMessage("An error occured!");
+        }
+    }
+    
+    const getAnalyticsData = async (user) => {
+        try {
+            const response = await apiClient.get(`analytics?userUpn=${user}`);
+
             setApiData(response.data);
             setOutlookData(restructureData(response.data.outlook, ["Send Count", "Receive Count", "Read Count"]));
-            
+
             // Implementation: step 2
             setSharepointData(restructureData(response.data.sharepoint, ["Shared Internally File Count", "Shared Externally File Count", "Viewed Or Edited File Count", "Visited Page Count"]));
             setTeamsData(restructureData(response.data.teams, ["Call Count", "Private Chat Message Count", "Team Chat Message Count", "Meetings Organized Count", "Ad Hoc Meetings Organized Count"]));
@@ -57,12 +72,11 @@ export default function TestDropdown(props) {
             setScreenCount(restructureData(response.data.teams, ["Screen Share Duration In Seconds"]));
             setMeetingData(restructureData(response.data.teams, ["Meetings Attended Count", "Scheduled One-time Meetings Attended", "Scheduled Recurring Meetings Attended Count", "Ad Hoc Meetings Attended Count"]))
         } catch (error) {
-            setIsClicked(false);
             let errorMessage = error.response.data.error;
             if (errorMessage.includes("invalid_grant")) {
                 triggerConsent(true);
             } else {
-                toasterErrorMessage("Failed to retrieve your Microsoft 365 data");
+                toasterErrorMessage("An error occured!");
             }
         }
     }
@@ -105,8 +119,9 @@ export default function TestDropdown(props) {
                     {loading && <Loader />}
                     {!loading && <Dropdown
                         key={dropdownData.content}
-                        search
+                        // search // this was commented out because it didn't allow for setting initial (default) value
                         items={dropdownData}
+                        defaultValue={[{ header: loggedInUser.displayName, content: loggedInUser.preferredUserName }]}
                         placeholder="Start typing a name"
                         getA11ySelectionMessage={getA11ySelectionMessage}
                         noResultsMessage="We couldn't find any matches."
@@ -135,8 +150,8 @@ export default function TestDropdown(props) {
             {!isClicked && !apiData && <pre className="fixed"></pre>}
             {apiData && <pre className="fixed">{JSON.stringify(apiData, null, 2)}</pre>}
             {/* Implementation: step 3 (nothing) */}
-            <MyHeader apiData={apiData} meetingCount={meetingCount} audioCount={audioCount} videoCount={videoCount} ScreenCount={ScreenCount}/>
-            <MyChart apiData={apiData} sharepointData={sharepointData} teamsData={teamsData} outlookData={outlookData} meetingData={meetingData}/>
+            <MyHeader apiData={apiData} meetingCount={meetingCount} audioCount={audioCount} videoCount={videoCount} ScreenCount={ScreenCount} />
+            <MyChart apiData={apiData} sharepointData={sharepointData} teamsData={teamsData} outlookData={outlookData} meetingData={meetingData} />
             <Toaster toastOptions={{ duration: 5000 }} />
         </div>
     );
