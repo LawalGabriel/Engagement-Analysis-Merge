@@ -19,6 +19,7 @@ export default function TestDropdown(props) {
     const [videoCount, setVidoeCount] = useState([]);
     const [ScreenCount, setScreenCount] = useState([]);
     const [meetingData, setMeetingData] = useState([]);
+    const [duration, setDuration]= useState('D180')
 
     const { loading } = useData(async () => {
         try {
@@ -41,7 +42,7 @@ export default function TestDropdown(props) {
 
     // Get analytics data for logged in user
     useData(async () => {
-        await getAnalyticsData(loggedInUser.preferredUserName);
+        await getAnalyticsData(loggedInUser.preferredUserName, duration);
     });
 
     const handleChange = async (event) => {
@@ -49,16 +50,29 @@ export default function TestDropdown(props) {
         setApiData();
         try {
             setIsClicked(false);
-            await getAnalyticsData(event.value.header);
+            await getAnalyticsData(event.value.header, duration);
+        } catch (error) {
+            setIsClicked(false);
+            toasterErrorMessage("An error occured!");
+        }
+    }
+
+    const handleDurationChange = async (event) => {
+        setIsClicked(true);
+        setApiData();
+        try {
+            setDuration('D'+event.value)
+            setIsClicked(false);
+            await getAnalyticsData(event.value.header, duration);
         } catch (error) {
             setIsClicked(false);
             toasterErrorMessage("An error occured!");
         }
     }
     
-    const getAnalyticsData = async (user) => {
+    const getAnalyticsData = async (user, duration) => {
         try {
-            const response = await apiClient.get(`analytics?userUpn=${user}`);
+            const response = await apiClient.get(`analytics?userUpn=${user}`, duration);
 
             setApiData(response.data);
             setOutlookData(restructureData(response.data.outlook, ["Send Count", "Receive Count", "Read Count"]));
@@ -137,7 +151,7 @@ export default function TestDropdown(props) {
                         placeholder="Select Duration"
                         getA11ySelectionMessage={getA11ySelectionMessage}
                         noResultsMessage="We couldn't find any matches."
-                        onChange={async (_, event) => await handleChange(event)}
+                        onChange={async (_, event) => await handleDurationChange(event)}
                     />}
                 </div>
             </div>
